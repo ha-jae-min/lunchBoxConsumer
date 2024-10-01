@@ -11,5 +11,5 @@ function MainPage() {
         </BasicLayout>
     );
 }
-
+// first commit 이홍근
 export default MainPage;
