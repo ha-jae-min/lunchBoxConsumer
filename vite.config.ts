@@ -9,4 +9,3 @@ export default defineConfig({
     port: 5173 // 원하는 포트 설정 (기본값 5173)
   }
 })
-
