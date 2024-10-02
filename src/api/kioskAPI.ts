@@ -5,7 +5,7 @@ import useMobileCheck from "../hooks/useMobileCheck.ts";
 const {isMobile} = useMobileCheck()
 
 const apiHost = isMobile
-    ? 'http://:8089/api/products' // 모바일에서 접근할 서버 IP
+    ? 'http://192.168.0.2:8089/api/products' // 모바일에서 접근할 서버 IP
     : 'http://localhost:8089/api/products';  // 컴퓨터에서 접근할 로컬 서버
 
 export const getProductList = async (page:number = 1, size:number = 10) => {
