@@ -6,14 +6,11 @@ import LoadingComponent from '../LoadingComponent.tsx';
 
 const initialState: IProduct = {
     pno: 0,
-    delFlag: false,
-    pdesc: '',
     pname: '',
     price: 0,
-    img: [],
-    regDate: '',
-    modDate: '',
-    writer: '',
+    pdesc: '',
+    delFlag: false,
+    files: [],
     uploadFileNames: []
 };
 
@@ -27,7 +24,7 @@ const DetailComponent = () => {
 
     const moveToList = (): void => {
         navigate({
-            pathname: '/product/list',
+            pathname: '/kiosk/list',
             search: queryString,
         });
     };
@@ -73,8 +70,8 @@ const DetailComponent = () => {
     }, [pno]);
 
     return (
-        <div className="flex flex-col space-y-6 w-96 mx-auto bg-white shadow-lg p-6 rounded-lg">
-            <h2 className="text-2xl font-bold text-center text-blue-500 mb-4">제품 상세 정보</h2>
+        <div className="flex flex-col space-y-6 w-full max-w-lg mx-auto bg-white shadow-lg p-4 sm:p-6 rounded-lg">
+            <h2 className="text-xl sm:text-2xl font-bold text-center text-blue-500 mb-4">제품 상세 정보</h2>
 
             {loading ? (
                 <LoadingComponent />
@@ -84,13 +81,13 @@ const DetailComponent = () => {
                     <div className="flex flex-col space-y-2">
                         <label className="text-sm font-semibold text-gray-700">제품 이미지</label>
                         {product.uploadFileNames && product.uploadFileNames.length > 0 ? (
-                            <div className="flex space-x-4">
+                            <div className="grid grid-cols-2 gap-2">
                                 {product.uploadFileNames.map((fileName, index) => (
                                     <img
                                         key={index}
                                         src={`http://localhost:8089/api/products/view/${fileName}`}
                                         alt={product.pname}
-                                        className="w-32 h-32 object-cover"
+                                        className="w-full h-auto object-cover"
                                     />
                                 ))}
                             </div>
@@ -159,22 +156,22 @@ const DetailComponent = () => {
                     </div>
 
                     {/* 버튼들 */}
-                    <div className="flex space-x-4 mt-4">
+                    <div className="flex flex-col space-y-4 mt-4">
                         <button
                             onClick={moveToList}
-                            className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200"
+                            className="w-full bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200"
                         >
-                            목록으로
+                            목록
                         </button>
                         <button
                             onClick={moveToReservationPage}
-                            className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200"
+                            className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200"
                         >
-                            예약 페이지로
+                            예약 페이지
                         </button>
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
+                            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
                         >
                             장바구니에 담기
                         </button>
