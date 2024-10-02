@@ -1,9 +1,6 @@
 import BasicLayout from "../layout/BasicLayout.tsx";
 
-
 function MainPage() {
-
-
     return (
         <BasicLayout>
             <div>Main Page</div>
@@ -11,5 +8,5 @@ function MainPage() {
         </BasicLayout>
     );
 }
-// first commit 이홍근
+
 export default MainPage;
