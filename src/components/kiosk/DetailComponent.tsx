@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getDetail } from '../../api/kioskAPI'; // getDetail API 사용
 import { IProduct } from '../../types/product';
 import LoadingComponent from '../LoadingComponent.tsx';
+import {addToCart, CartItem} from "../../slices/cartSlice.ts";
+import {useAppDispatch} from "../../hooks/rtk.ts";
 
 const initialState: IProduct = {
     pno: 0,
@@ -24,10 +26,11 @@ const DetailComponent = () => {
     const [loading, setLoading] = useState(true); // 로딩 상태
     const navigate = useNavigate();
     const queryString = window.location.search; // 검색어 파라미터 유지
+    const dispatch = useAppDispatch()
 
     const moveToList = (): void => {
         navigate({
-            pathname: '/product/list',
+            pathname: '/kiosk/list',
             search: queryString,
         });
     };
@@ -40,14 +43,16 @@ const DetailComponent = () => {
     };
 
     const handleAddToCart = (): void => {
-        const cartItem = {
+        const cartItem: CartItem = {
             pno: product.pno,
             pname: product.pname,
             quantity,
             totalPrice: product.price * quantity,
         };
-        // 장바구니 로직을 여기에 추가할 수 있습니다 (API 사용시 주석 해제)
-        // localStorage.setItem('cart', JSON.stringify(cartItem));
+
+        // 상태 관리
+        dispatch(addToCart(cartItem));
+
         console.log('장바구니에 추가됨:', cartItem);
         moveToList(); // 장바구니에 추가 후 목록 페이지로 이동
     };
