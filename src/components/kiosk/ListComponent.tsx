@@ -2,6 +2,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { IProduct, IPageResponse } from "../../types/product.ts";
 import { getProductList } from "../../api/kioskAPI.ts";
 import LoadingComponent from "../LoadingComponent.tsx";
+import useMobileCheck from "../../hooks/useMobileCheck.ts";
+import {useNavigate} from "react-router-dom";
 
 const initialState: IPageResponse = {
     dtoList: [],
@@ -25,6 +27,7 @@ function ListComponent() {
     const [loading, setLoading] = useState<boolean>(false);
     const [pageResponse, setPageResponse] = useState<IPageResponse>(initialState);
     const [hasMore, setHasMore] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     // 스크롤 감지 Ref
     const observer = useRef<IntersectionObserver | null>(null);
@@ -60,19 +63,31 @@ function ListComponent() {
         });
     }, [page]);
 
+    const {isMobile} = useMobileCheck()
+
+    // 조회 페이지 이동
+    const moveToRead = (pno: number) => {
+        navigate(`/kiosk/detail/${pno}`);
+    };
+
     const listLI = pageResponse.dtoList.map((product: IProduct, index) => {
         const { pno, pname, pdesc, price, uploadFileNames } = product;
 
+        // 모바일과 데스크탑에 맞는 URL로 처리
         const thumbnailUrl = uploadFileNames.length > 0
-            ? `http://localhost:8089/api/products/view/s_${uploadFileNames[0]}`
+            ? isMobile
+                ? `http://192.168.0.2:8089/api/products/view/s_${uploadFileNames[0]}`
+                : `http://localhost:8089/api/products/view/s_${uploadFileNames[0]}`
             : null;
 
         return (
             <li
                 key={pno}
+                onClick={() => moveToRead(pno)}
                 ref={index === pageResponse.dtoList.length - 1 ? lastElementRef : null}
                 className="flex items-center space-x-4 p-4 border border-gray-300 rounded-xl mb-4 shadow-lg"
-                style={{boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)'}}
+                style={{boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)'}
+            }
             >
                 {thumbnailUrl && (
                     <img src={thumbnailUrl} alt={pname} className="w-24 h-24 object-cover rounded-md"/>

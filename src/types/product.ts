@@ -1,12 +1,14 @@
-
 export interface IProduct {
     pno: number;
+    delFlag: boolean;
+    pdesc: string;
     pname: string;
     price: number;
-    pdesc: string;
-    delFlag: boolean;
-    files: string[];
-    uploadFileNames: string[];
+    img: string[];
+    regDate: string;
+    modDate: string;
+    writer:string;
+    uploadFileNames: string[];  // 추가된 필드
 }
 
 export interface IPageRequestDTO {
