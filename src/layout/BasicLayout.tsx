@@ -11,7 +11,7 @@ function BasicLayout({ children }: { children: React.ReactNode }) {
                     <nav className="hidden md:flex space-x-6">
                         <Link to="/" className="text-gray-700 hover:text-orange-600 transition duration-200">홈</Link>
                         <Link to="/kiosk" className="text-gray-700 hover:text-orange-600 transition duration-200">키오스크</Link>
-                        <Link to="/orders" className="text-gray-700 hover:text-orange-600 transition duration-200">예약 내역</Link>
+                        <Link to="/reservationList" className="text-gray-700 hover:text-orange-600 transition duration-200">예약 내역</Link>
                         <Link to="/profile" className="text-gray-700 hover:text-orange-600 transition duration-200">내 정보</Link>
                     </nav>
                 </div>
@@ -37,7 +37,7 @@ function BasicLayout({ children }: { children: React.ReactNode }) {
                         </svg>
                         <span className="text-xs">키오스크</span>
                     </Link>
-                    <Link to="/orders" className="text-gray-700 hover:text-orange-600 flex flex-col items-center">
+                    <Link to="/reservationList" className="text-gray-700 hover:text-orange-600 flex flex-col items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M16 5a3 3 0 10-6 0 3 3 0 006 0zm-3 6a5.978 5.978 0 00-4.285 1.77A6.004 6.004 0 008 18h8a6.004 6.004 0 00-4.285-5.23A5.978 5.978 0 0013 11z" />
                         </svg>
