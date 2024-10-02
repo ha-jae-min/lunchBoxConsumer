@@ -3,7 +3,8 @@ import { IProduct, IPageResponse } from "../../types/product.ts";
 import { getProductList } from "../../api/kioskAPI.ts";
 import LoadingComponent from "../LoadingComponent.tsx";
 import useMobileCheck from "../../hooks/useMobileCheck.ts";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../hooks/rtk.ts";
 
 const initialState: IPageResponse = {
     dtoList: [],
@@ -28,6 +29,7 @@ function ListComponent() {
     const [pageResponse, setPageResponse] = useState<IPageResponse>(initialState);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const navigate = useNavigate();
+    const cartItems = useAppSelector((state) => state.cart.products); // 장바구니 상태 가져오기
 
     // 스크롤 감지 Ref
     const observer = useRef<IntersectionObserver | null>(null);
@@ -48,6 +50,11 @@ function ListComponent() {
         [loading, hasMore]
     );
 
+    // 장바구니에 담긴 총 금액 계산
+    const totalCartPrice = cartItems.reduce(
+        (total, item) => total + item.totalPrice,
+        0
+    );
 
     useEffect(() => {
         setLoading(true);
@@ -63,11 +70,16 @@ function ListComponent() {
         });
     }, [page]);
 
-    const {isMobile} = useMobileCheck()
+    const { isMobile } = useMobileCheck();
 
     // 조회 페이지 이동
     const moveToRead = (pno: number) => {
         navigate(`/kiosk/detail/${pno}`);
+    };
+
+    // 장바구니 페이지로 이동
+    const moveToCartPage = () => {
+        navigate("/kiosk/cart"); // 장바구니 페이지 경로로 이동
     };
 
     const listLI = pageResponse.dtoList.map((product: IProduct, index) => {
@@ -86,8 +98,7 @@ function ListComponent() {
                 onClick={() => moveToRead(pno)}
                 ref={index === pageResponse.dtoList.length - 1 ? lastElementRef : null}
                 className="flex items-center space-x-4 p-4 border border-gray-300 rounded-xl mb-4 shadow-lg"
-                style={{boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)'}
-            }
+                style={{ boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)' }}
             >
                 {thumbnailUrl && (
                     <img src={thumbnailUrl} alt={pname} className="w-24 h-24 object-cover rounded-md"/>
@@ -109,9 +120,33 @@ function ListComponent() {
 
             <ul className="divide-y divide-gray-200">{listLI}</ul>
 
-            {loading && <LoadingComponent/>}
+            {loading && <LoadingComponent />}
+
+            {/* 장바구니 총 금액 및 버튼 */}
+            {cartItems.length > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex flex-col space-y-4 items-center">
+                    <div className="w-full flex justify-between items-center">
+                        <span className="text-lg font-semibold">총 금액: {totalCartPrice}원</span>
+                        <button
+                            onClick={moveToCartPage}
+                            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
+                        >
+                            장바구니 가기
+                        </button>
+                    </div>
+
+                    {/* 빈 버튼 */}
+                    <button
+                        className="bg-gray-400 text-white py-2 px-4 rounded-lg"
+                        disabled
+                    >
+                        빈 버튼
+                    </button>
+                </div>
+            )}
         </div>
     );
+
 }
 
 export default ListComponent;
