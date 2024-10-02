@@ -1,57 +1,104 @@
-import { IReservation } from "../../types/reservation.ts";
-import useReservation from "../../hooks/useReservation.ts";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { IReservation, IPageResponse } from "../../types/reservation.ts";
+import { getReservationList } from "../../api/reservationAPI.ts"; // API 함수 import
 import LoadingComponent from "../LoadingComponent.tsx";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+const initialState: IPageResponse = {
+    dtoList: [],
+    pageNumList: [],
+    pageRequestDTO: {
+        page: 1,
+        size: 10,
+    },
+    prev: false,
+    next: false,
+    totalCount: 0,
+    prevPage: 0,
+    nextPage: 0,
+    totalPage: 0,
+    current: 1,
+};
 
 function ReservationListComponent() {
-    const { loading, pageResponse, moveToRead, fetchMore } = useReservation();
+    const [page, setPage] = useState<number>(1);
+    const [size] = useState<number>(10);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [pageResponse, setPageResponse] = useState<IPageResponse>(initialState);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const navigate = useNavigate();
+
+    // 스크롤 감지 Ref
+    const observer = useRef<IntersectionObserver | null>(null);
+
+    const lastElementRef = useCallback(
+        (node: HTMLElement | null) => {
+            if (loading) return;
+            if (observer.current) observer.current.disconnect();
+
+            observer.current = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasMore) {
+                    setPage((prevPage) => prevPage + 1);
+                }
+            });
+
+            if (node) observer.current.observe(node);
+        },
+        [loading, hasMore]
+    );
 
     useEffect(() => {
-        const handleScroll = () => {
-            if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
-                fetchMore();
+        const fetchReservations = async () => {
+            setLoading(true);
+            try {
+                const data = await getReservationList(page, size);
+                setPageResponse((prevData) => ({
+                    ...data,
+                    dtoList: [...prevData.dtoList, ...data.dtoList], // 기존 데이터에 추가
+                }));
+                if (data.dtoList.length < size) {
+                    setHasMore(false); // 더 이상 데이터가 없을 경우
+                }
+            } catch (error) {
+                console.error("Error fetching reservations:", error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        window.addEventListener("scroll", handleScroll);
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
-    }, [fetchMore]);
+        fetchReservations();
+    }, [page]);
 
-    const listLI = pageResponse.content.map((reservation: IReservation) => {
+    const moveToRead = (mno: number) => {
+        navigate(`/reservation/detail/${mno}`);
+    };
+
+    const listLI = pageResponse.dtoList.map((reservation: IReservation, index) => {
         const { mno, title, dueDate } = reservation;
-
-        // title을 도시락 종류, 수량, 총가격으로 변환
-        const [lunchboxType, quantity, totalPrice] = title.split(" - ");
 
         return (
             <li
-                key={mno}
-                onClick={() => moveToRead(mno)}
-                className="flex justify-between items-center p-4 mb-2 bg-white rounded-lg shadow-md hover:bg-orange-100 transition cursor-pointer border border-gray-200"
-                style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }} // 더 부드러운 그림자 효과
+                key={index}
+                onClick={() => moveToRead(Number(mno))}
+                ref={index === pageResponse.dtoList.length - 1 ? lastElementRef : null}
+                className="flex items-center space-x-4 p-4 border border-gray-300 rounded-xl mb-4 shadow-lg"
+                style={{ boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)' }}
             >
-                <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-500">예약번호: {mno}</span>
-                    <span className="font-bold text-lg text-gray-900">{lunchboxType} x{quantity}</span>
-                </div>
-                <div className="text-gray-600 text-sm text-right">
-                    <span className="block mb-1">총 가격: <span className="font-medium">{totalPrice}원</span></span>
-                    <span>예약일: {dueDate}</span>
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        {title}
+                    </h3>
+                    <p className="text-md font-medium text-gray-900">예약일: {dueDate}</p>
                 </div>
             </li>
         );
     });
 
     return (
-        <div className="container mx-auto px-4 py-6 bg-gray-50 rounded-lg shadow-lg max-w-3xl">
+        <div className="container mx-auto py-6">
+            <div className="text-xl font-bold mb-4">Reservation List</div>
+            <ul className="divide-y divide-gray-200">{listLI}</ul>
             {loading && <LoadingComponent />}
-            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">도시락 예약 내역</h2>
-
-            <ul className="divide-y divide-gray-200 space-y-4">
-                {listLI}
-            </ul>
         </div>
     );
 }

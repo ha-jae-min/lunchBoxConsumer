@@ -5,12 +5,20 @@ export interface IReservation {
     dueDate: string;
 }
 
-export interface IPageResponse {
-    content: IReservation[];
-    totalElements: number;
-    number: number;
-    first: boolean;
-    last: boolean;
+export interface IPageRequestDTO {
+    page: number;
     size: number;
-    totalPages: number;
+}
+
+export interface IPageResponse {
+    dtoList: IReservation[];
+    pageNumList: number[];
+    pageRequestDTO: IPageRequestDTO;
+    prev: boolean;
+    next: boolean;
+    totalCount: number;
+    prevPage: number;
+    nextPage: number;
+    totalPage: number;
+    current: number;
 }
