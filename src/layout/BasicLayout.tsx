@@ -37,17 +37,17 @@ function BasicLayout({ children }: { children: React.ReactNode }) {
                         </svg>
                         <span className="text-xs">키오스크</span>
                     </Link>
-                    <Link to="/reservationList" className="text-gray-700 hover:text-orange-600 flex flex-col items-center">
+                    <Link to="/reservation" className="text-gray-700 hover:text-orange-600 flex flex-col items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M16 5a3 3 0 10-6 0 3 3 0 006 0zm-3 6a5.978 5.978 0 00-4.285 1.77A6.004 6.004 0 008 18h8a6.004 6.004 0 00-4.285-5.23A5.978 5.978 0 0013 11z" />
                         </svg>
                         <span className="text-xs">예약 내역</span>
                     </Link>
-                    <Link to="/profile" className="text-gray-700 hover:text-orange-600 flex flex-col items-center">
+                    <Link to="/kiosk/cart" className="text-gray-700 hover:text-orange-600 flex flex-col items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M10 2a1 1 0 00-1 1v4.586l-1.707-1.707a1 1 0 00-1.414 1.414L9.586 10l-2.707 2.707a1 1 0 001.414 1.414L10 11.414V16a1 1 0 002 0v-4.586l1.707 1.707a1 1 0 001.414-1.414L12.414 10l2.707-2.707a1 1 0 00-1.414-1.414L10 7.586V3a1 1 0 00-1-1z" />
                         </svg>
-                        <span className="text-xs">내 정보</span>
+                        <span className="text-xs">장바구니</span>
                     </Link>
                 </div>
             </footer>

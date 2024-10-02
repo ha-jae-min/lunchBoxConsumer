@@ -4,7 +4,8 @@ import { getDetail } from '../../api/kioskAPI'; // getDetail API 사용
 import { IProduct } from '../../types/product';
 import LoadingComponent from '../LoadingComponent.tsx';
 import useMobileCheck from '../../hooks/useMobileCheck';
-// import { useDispatch } from 'react-redux'; // 리덕스 디스패치 추가 (추후 구현 예정)
+import { addToCart, CartItem } from '../../slices/cartSlice.ts';
+import { useAppDispatch } from '../../hooks/rtk.ts';
 
 const initialState: IProduct = {
     pno: 0,
@@ -26,13 +27,12 @@ const DetailComponent = () => {
     const [loading, setLoading] = useState(true); // 로딩 상태
     const navigate = useNavigate();
     const queryString = window.location.search; // 검색어 파라미터 유지
+    const dispatch = useAppDispatch();
 
     const { isMobile } = useMobileCheck(); // 모바일 체크
     const apiHost = isMobile
-        ? 'http://192.168.45.155:8089/api/products' // 모바일용 서버 주소
+        ? 'http://:8089/api/products' // 모바일용 서버 주소
         : 'http://localhost:8089/api/products'; // 로컬 서버 주소
-
-    // const dispatch = useDispatch(); // Redux Dispatch (추후 구현 예정)
 
     const moveToListPage = (): void => {
         navigate({
@@ -42,22 +42,15 @@ const DetailComponent = () => {
     };
 
     const handleAddToCart = (): void => {
-        const cartItem = {
+        const cartItem: CartItem = {
             pno: product.pno,
             pname: product.pname,
             quantity,
             totalPrice: product.price * quantity,
         };
 
-        // Redux Toolkit으로 장바구니 상태 관리 (추후 구현)
-        /*
-        dispatch(addToCart({
-            pno: product.pno,
-            pname: product.pname,
-            quantity,
-            totalPrice: product.price * quantity,
-        }));
-        */
+        // 상태 관리
+        dispatch(addToCart(cartItem));
 
         console.log('장바구니에 추가됨:', cartItem);
         moveToListPage(); // 장바구니에 추가 후 목록 페이지로 이동
