@@ -4,8 +4,7 @@ import LoadingPage from "../pages/LoadingPage.tsx";
 import kioskRouter from "./kioskRouter.tsx";
 
 const MainPage = lazy(() => import("../pages/MainPage"))
-const KioskDetail = lazy(() => import("../pages/DetailPage.tsx"))
-
+const KioskDetail = lazy(() => import("../pages/DetailPage"))
 const Loading = <LoadingPage></LoadingPage>
 
 const mainRouter = createBrowserRouter([
