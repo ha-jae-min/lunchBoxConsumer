@@ -3,15 +3,21 @@ import { useEffect, useState, useCallback } from "react";
 import { IPageResponse } from "../types/reservation.ts";
 import { getReservationList } from "../api/reservationAPI.ts";
 
-const initialState = {
+const initialState: IPageResponse = {
     content: [],
-    first: false,
-    last: false,
-    number: 0,
-    size: 0,
-    totalElements: 0,
-    totalPages: 0
-}
+    pageNumList: [],
+    pageRequestDTO: {
+        page: 1,
+        size: 10,
+    },
+    prev: false,
+    next: false,
+    totalCount: 0,
+    prevPage: 0,
+    nextPage: 0,
+    totalPage: 0,
+    current: 1,
+};
 
 const useReservation = () => {
     const [query] = useSearchParams();
@@ -39,9 +45,9 @@ const useReservation = () => {
         });
     }, [loading, hasMore, page, size]);
 
-    const moveToRead = (rno: number | undefined) => {
-        navigate(`/reservation/read/${rno}`);
-    }
+    const moveToRead = (mno: number | undefined) => {
+        navigate(`/reservation/detail/${mno}`);
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -52,6 +58,6 @@ const useReservation = () => {
     }, [query, location.key]);
 
     return { loading, pageResponse, moveToRead, fetchMore };
-}
+};
 
 export default useReservation;

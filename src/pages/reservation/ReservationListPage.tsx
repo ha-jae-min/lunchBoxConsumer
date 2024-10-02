@@ -3,9 +3,6 @@ import ReservationListComponent from "../../components/reservation/ReservationLi
 function ReservationListPage() {
     return (
         <>
-            <div>
-                Reservation List Page
-            </div>
             <ReservationListComponent />
         </>
     );
