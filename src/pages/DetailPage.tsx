@@ -1,4 +1,4 @@
-import DetailComponent from "../../components/kiosk/DetailComponent.tsx";
+import DetailComponent from "../components/kiosk/DetailComponent.tsx";
 
 function DetailPage() {
     return (

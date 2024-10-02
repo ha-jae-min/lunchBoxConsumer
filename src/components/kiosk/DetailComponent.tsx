@@ -3,8 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getDetail } from '../../api/kioskAPI'; // getDetail API 사용
 import { IProduct } from '../../types/product';
 import LoadingComponent from '../LoadingComponent.tsx';
-import {addToCart, CartItem} from "../../slices/cartSlice.ts";
-import {useAppDispatch} from "../../hooks/rtk.ts";
+import useMobileCheck from '../../hooks/useMobileCheck';
+import { addToCart, CartItem } from '../../slices/cartSlice.ts';
+import { useAppDispatch } from '../../hooks/rtk.ts';
 
 const initialState: IProduct = {
     pno: 0,
@@ -26,18 +27,16 @@ const DetailComponent = () => {
     const [loading, setLoading] = useState(true); // 로딩 상태
     const navigate = useNavigate();
     const queryString = window.location.search; // 검색어 파라미터 유지
-    const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch();
 
-    const moveToList = (): void => {
-        navigate({
-            pathname: '/kiosk/list',
-            search: queryString,
-        });
-    };
+    const { isMobile } = useMobileCheck(); // 모바일 체크
+    const apiHost = isMobile
+        ? 'http://:8089/api/products' // 모바일용 서버 주소
+        : 'http://localhost:8089/api/products'; // 로컬 서버 주소
 
-    const moveToReservationPage = (): void => {
+    const moveToListPage = (): void => {
         navigate({
-            pathname: '/reservation',
+            pathname: '/kiosk/list',  // 목록 페이지로 이동
             search: queryString,
         });
     };
@@ -54,12 +53,13 @@ const DetailComponent = () => {
         dispatch(addToCart(cartItem));
 
         console.log('장바구니에 추가됨:', cartItem);
-        moveToList(); // 장바구니에 추가 후 목록 페이지로 이동
+        moveToListPage(); // 장바구니에 추가 후 목록 페이지로 이동
     };
 
-    const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newQuantity = Math.max(1, Number(event.target.value)); // 수량 최소 1 이상 유지
-        setQuantity(newQuantity);
+    const handleQuantityChange = (newQuantity: number) => {
+        if (newQuantity >= 1) {
+            setQuantity(newQuantity);
+        }
     };
 
     useEffect(() => {
@@ -78,8 +78,8 @@ const DetailComponent = () => {
     }, [pno]);
 
     return (
-        <div className="flex flex-col space-y-6 w-96 mx-auto bg-white shadow-lg p-6 rounded-lg">
-            <h2 className="text-2xl font-bold text-center text-blue-500 mb-4">제품 상세 정보</h2>
+        <div className="flex flex-col space-y-6 w-full max-w-lg mx-auto bg-white shadow-lg p-4 sm:p-6 rounded-lg">
+            <h2 className="text-xl sm:text-2xl font-bold text-center text-blue-500 mb-4">제품 상세 정보</h2>
 
             {loading ? (
                 <LoadingComponent />
@@ -89,13 +89,13 @@ const DetailComponent = () => {
                     <div className="flex flex-col space-y-2">
                         <label className="text-sm font-semibold text-gray-700">제품 이미지</label>
                         {product.uploadFileNames && product.uploadFileNames.length > 0 ? (
-                            <div className="flex space-x-4">
+                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                                 {product.uploadFileNames.map((fileName, index) => (
                                     <img
                                         key={index}
-                                        src={`http://localhost:8089/api/products/view/${fileName}`}
+                                        src={`${apiHost}/view/${fileName}`}
                                         alt={product.pname}
-                                        className="w-32 h-32 object-cover"
+                                        className="w-full h-auto object-cover rounded-lg shadow-sm"
                                     />
                                 ))}
                             </div>
@@ -104,19 +104,14 @@ const DetailComponent = () => {
                         )}
                     </div>
 
-                    {/* 제품 이름 */}
-                    <div className="flex flex-col space-y-2">
-                        <label className="text-sm font-semibold text-gray-700">제품 이름</label>
-                        <input
-                            type="text"
-                            name="pname"
-                            value={product.pname || ''}
-                            readOnly
-                            className="border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-700"
-                        />
+                    {/* 제품 이름과 가격 */}
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold text-gray-700">제품 이름</span>
+                        <span className="text-sm font-semibold text-gray-700">{product.pname}</span>
+                        <span className="text-sm font-semibold text-gray-700">가격: {product.price}원</span>
                     </div>
 
-                    {/* 제품 설명 */}
+                    {/* 제품 설명 추가 */}
                     <div className="flex flex-col space-y-2">
                         <label className="text-sm font-semibold text-gray-700">제품 설명</label>
                         <textarea
@@ -127,61 +122,35 @@ const DetailComponent = () => {
                         />
                     </div>
 
-                    {/* 제품 가격 */}
-                    <div className="flex flex-col space-y-2">
-                        <label className="text-sm font-semibold text-gray-700">가격</label>
-                        <input
-                            type="text"
-                            name="price"
-                            value={product.price || ''}
-                            readOnly
-                            className="border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-700"
-                        />
-                    </div>
-
                     {/* 수량 선택 */}
-                    <div className="flex flex-col space-y-2">
-                        <label className="text-sm font-semibold text-gray-700">수량</label>
-                        <input
-                            type="number"
-                            name="quantity"
-                            value={quantity}
-                            onChange={handleQuantityChange}
-                            className="border border-gray-300 rounded-lg p-3 text-gray-700"
-                        />
-                    </div>
-
-                    {/* 총 가격 표시 */}
-                    <div className="flex flex-col space-y-2">
-                        <label className="text-sm font-semibold text-gray-700">총 가격</label>
+                    <div className="flex items-center">
+                        <button
+                            onClick={() => handleQuantityChange(quantity - 1)}
+                            className="w-8 h-8 bg-gray-300 text-lg font-bold rounded-lg"
+                        >
+                            -
+                        </button>
                         <input
                             type="text"
-                            name="totalPrice"
-                            value={product.price * quantity || ''}
+                            value={quantity}
                             readOnly
-                            className="border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-700"
+                            className="w-16 mx-2 text-center border border-gray-300 rounded-lg p-2 bg-gray-100 text-gray-700"
                         />
+                        <button
+                            onClick={() => handleQuantityChange(quantity + 1)}
+                            className="w-8 h-8 bg-gray-300 text-lg font-bold rounded-lg"
+                        >
+                            +
+                        </button>
                     </div>
 
-                    {/* 버튼들 */}
-                    <div className="flex space-x-4 mt-4">
-                        <button
-                            onClick={moveToList}
-                            className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200"
-                        >
-                            목록으로
-                        </button>
-                        <button
-                            onClick={moveToReservationPage}
-                            className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-200"
-                        >
-                            예약 페이지로
-                        </button>
+                    {/* 장바구니에 담기 버튼 */}
+                    <div className="flex justify-between">
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
+                            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
                         >
-                            장바구니에 담기
+                            {product.price * quantity}원 장바구니에 담기
                         </button>
                     </div>
                 </>

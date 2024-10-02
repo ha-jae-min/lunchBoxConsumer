@@ -76,7 +76,7 @@ function ListComponent() {
         // 모바일과 데스크탑에 맞는 URL로 처리
         const thumbnailUrl = uploadFileNames.length > 0
             ? isMobile
-                ? `http://192.168.0.2:8089/api/products/view/s_${uploadFileNames[0]}`
+                ? `http://:8089/api/products/view/s_${uploadFileNames[0]}`
                 : `http://localhost:8089/api/products/view/s_${uploadFileNames[0]}`
             : null;
 
