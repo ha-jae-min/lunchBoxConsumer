@@ -79,10 +79,18 @@ const DetailComponent = () => {
 
     return (
         <div className="flex flex-col space-y-6 w-full max-w-lg mx-auto bg-white shadow-lg p-4 sm:p-6 rounded-lg">
-            <h2 className="text-xl sm:text-2xl font-bold text-center text-blue-500 mb-4">제품 상세 정보</h2>
+            <div className="flex items-center mb-4">
+                <button
+                    onClick={moveToListPage}
+                    className="text-black text-lg font-bold mr-4 hover:text-gray-800 transition duration-200"
+                >
+                    ←
+                </button>
+                <h2 className="text-xl sm:text-2xl font-bold text-center text-blue-500">제품 상세 정보</h2>
+            </div>
 
             {loading ? (
-                <LoadingComponent />
+                <LoadingComponent/>
             ) : (
                 <>
                     {/* 제품 이미지 */}

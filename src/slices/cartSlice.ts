@@ -1,4 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Cookies } from "react-cookie";
+
+const cookies = new Cookies(); // Cookies 객체 생성
 
 // 장바구니에 담을 제품의 인터페이스 정의
 export interface CartItem {
@@ -14,6 +17,11 @@ export interface CartState {
 
 const initialState: CartState = {
     products: [], // 초기에는 빈 장바구니
+};
+
+// 쿠키에 장바구니 상태 저장 함수
+const saveCartToCookies = (cartItems: CartItem[]) => {
+    cookies.set("cart", JSON.stringify(cartItems), { path: "/", maxAge: 3600 });
 };
 
 const cartSlice = createSlice({
@@ -35,6 +43,8 @@ const cartSlice = createSlice({
                 state.products.push(action.payload);
             }
 
+            // 쿠키에 업데이트된 장바구니 상태 저장
+            saveCartToCookies(state.products);
             console.log("장바구니에 추가:", state.products);
         },
 
@@ -44,12 +54,17 @@ const cartSlice = createSlice({
                 (item) => item.pno !== action.payload
             );
 
+            // 쿠키에 업데이트된 장바구니 상태 저장
+            saveCartToCookies(state.products);
             console.log("장바구니에서 삭제:", state.products);
         },
 
         // 장바구니 초기화
         clearCart: (state) => {
             state.products = [];
+
+            // 쿠키에 빈 장바구니 상태 저장
+            saveCartToCookies(state.products);
             console.log("장바구니 초기화:", state.products);
         },
     },
