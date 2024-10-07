@@ -8,6 +8,7 @@ const Loading = <LoadingPage/>
 const KioskIndex = lazy(() => import("../pages/kiosk/IndexPage"))
 const KioskList = lazy(() => import("../pages/kiosk/ListPage"))
 const KioskCart = lazy(() => import("../pages/kiosk/CartPage"))
+const PaymentPage = lazy(() => import("../pages/PaymentPage"))
 
 const kioskRouter = {
     path:'/kiosk',
@@ -24,6 +25,10 @@ const kioskRouter = {
         {
             path: "cart",
             element: <Suspense fallback={Loading}><KioskCart/></Suspense>,
+        },
+        {
+            path: "payment",
+            element: <Suspense fallback={Loading}><PaymentPage/></Suspense>
         }
     ]
 
