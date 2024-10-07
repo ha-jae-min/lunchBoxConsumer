@@ -1,12 +1,21 @@
+import { useAppSelector, useAppDispatch } from "../../hooks/rtk.ts";
+import { removeFromCart } from "../../slices/cartSlice.ts";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "../../hooks/rtk.ts";
 
 function CartComponent() {
+    // 장바구니 상태
     const navigate = useNavigate();
     const cartItems = useAppSelector((state) => state.cart.products);
+    const dispatch = useAppDispatch();
 
+    // 삭제 버튼 클릭 핸들러
+    const handleRemove = (pno: number) => {
+        dispatch(removeFromCart(pno));
+    };
+
+    // 예약 버튼 클릭 핸들러 (결제 페이지로 이동)
     const handleReserve = () => {
-        navigate('/kiosk/payment'); // 결제 페이지로 이동
+        navigate('/kiosk/payment');
     };
 
     return (
@@ -25,6 +34,12 @@ function CartComponent() {
                                     <p className="text-gray-600">수량: {item.quantity}</p>
                                     <p className="text-gray-600">총 가격: {item.totalPrice}원</p>
                                 </div>
+                                <button
+                                    onClick={() => handleRemove(item.pno)}
+                                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200"
+                                >
+                                    삭제
+                                </button>
                             </li>
                         ))}
                     </ul>
