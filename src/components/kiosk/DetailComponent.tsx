@@ -31,8 +31,8 @@ const DetailComponent = () => {
 
     const { isMobile } = useMobileCheck(); // 모바일 체크
     const apiHost = isMobile
-        ? 'http://:8089/api/products' // 모바일용 서버 주소
-        : 'http://localhost:8089/api/products'; // 로컬 서버 주소
+        ? 'http://192.168.0.2:8091/api/products' // 모바일용 서버 주소
+        : 'http://localhost:8091/api/products'; // 로컬 서버 주소
 
     const moveToListPage = (): void => {
         navigate({

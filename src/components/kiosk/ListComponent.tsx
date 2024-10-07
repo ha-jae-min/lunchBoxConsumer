@@ -1,95 +1,23 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import { IProduct, IPageResponse } from "../../types/product.ts";
-import { getProductList } from "../../api/kioskAPI.ts";
+import { IProduct } from "../../types/product.ts";
 import LoadingComponent from "../LoadingComponent.tsx";
-import useMobileCheck from "../../hooks/useMobileCheck.ts";
-import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "../../hooks/rtk.ts";
-
-const initialState: IPageResponse = {
-    dtoList: [],
-    pageNumList: [],
-    pageRequestDTO: {
-        page: 1,
-        size: 10,
-    },
-    prev: false,
-    next: false,
-    totalCount: 0,
-    prevPage: 0,
-    nextPage: 0,
-    totalPage: 0,
-    current: 1,
-};
+import useList from "../../hooks/useList.ts";
+import { useState } from "react";
 
 function ListComponent() {
-    const [page, setPage] = useState<number>(1);
-    const [size] = useState<number>(10);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [pageResponse, setPageResponse] = useState<IPageResponse>(initialState);
-    const [hasMore, setHasMore] = useState<boolean>(true);
-    const navigate = useNavigate();
-    const cartItems = useAppSelector((state) => state.cart.products); // 장바구니 상태 가져오기
+    const { isMobile, loading, pageResponse, lastElementRef, moveToCartPage,
+        totalCartPrice, cartItems, moveToRead, handleCategorySelect } = useList();  // handleCategorySelect 제거
 
-    // 스크롤 감지 Ref
-    const observer = useRef<IntersectionObserver | null>(null);
-
-    const lastElementRef = useCallback(
-        (node: HTMLElement | null) => {
-            if (loading) return;
-            if (observer.current) observer.current.disconnect();
-
-            observer.current = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && hasMore) {
-                    setPage((prevPage) => prevPage + 1);
-                }
-            });
-
-            if (node) observer.current.observe(node);
-        },
-        [loading, hasMore]
-    );
-
-    // 장바구니에 담긴 총 금액 계산
-    const totalCartPrice = cartItems.reduce(
-        (total, item) => total + item.totalPrice,
-        0
-    );
-
-    useEffect(() => {
-        setLoading(true);
-        getProductList(page, size).then((data) => {
-            setPageResponse((prevData) => ({
-                ...data,
-                dtoList: [...prevData.dtoList, ...data.dtoList], // 기존 데이터에 추가
-            }));
-            setLoading(false);
-            if (data.dtoList.length < size) {
-                setHasMore(false); // 더 이상 데이터가 없을 경우
-            }
-        });
-    }, [page]);
-
-    const { isMobile } = useMobileCheck();
-
-    // 조회 페이지 이동
-    const moveToRead = (pno: number) => {
-        navigate(`/kiosk/detail/${pno}`);
-    };
-
-    // 장바구니 페이지로 이동
-    const moveToCartPage = () => {
-        navigate("/kiosk/cart"); // 장바구니 페이지 경로로 이동
-    };
+    // 카테고리 목록 정의
+    const categories = ["전체", "맥", "피카츄", "라이츄", "숟가락", "젓가락"];
+    const [selectedCategory, setSelectedCategory] = useState<string>("전체");
 
     const listLI = pageResponse.dtoList.map((product: IProduct, index) => {
         const { pno, pname, pdesc, price, uploadFileNames } = product;
 
-        // 모바일과 데스크탑에 맞는 URL로 처리
         const thumbnailUrl = uploadFileNames.length > 0
             ? isMobile
-                ? `http://192.168.45.155:8089/api/products/view/s_${uploadFileNames[0]}`
-                : `http://localhost:8089/api/products/view/s_${uploadFileNames[0]}`
+                ? `http://192.168.0.2:8091/api/products/view/s_${uploadFileNames[0]}`
+                : `http://localhost:8091/api/products/view/s_${uploadFileNames[0]}`
             : null;
 
         return (
@@ -116,15 +44,38 @@ function ListComponent() {
 
     return (
         <div className="container mx-auto py-6">
+
+            {/* 카테고리 선택 바 */}
+            <div className="overflow-x-auto mb-6">
+                <div className="flex space-x-4 whitespace-nowrap">
+                    {categories.map((category) => (
+                        <button
+                            key={category}
+                            className={`px-6 py-2 whitespace-nowrap rounded-full border transition duration-200
+                            ${selectedCategory === category
+                                ? "bg-orange-500 text-white border-orange-500"
+                                : "bg-white text-gray-700 border-gray-300"}`}
+                            onClick={() => {
+                                setSelectedCategory(category);
+                                handleCategorySelect(category);
+                            }}
+                        >
+                            {category}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <div className="text-xl font-bold mb-4">Product List</div>
 
             <ul className="divide-y divide-gray-200">{listLI}</ul>
 
-            {loading && <LoadingComponent />}
+            {loading && <LoadingComponent/>}
 
             {/* 장바구니 총 금액 및 버튼 */}
             {cartItems.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex flex-col space-y-4 items-center">
+                <div
+                    className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex flex-col space-y-4 items-center">
                     <div className="w-full flex justify-between items-center">
                         <span className="text-lg font-semibold">총 금액: {totalCartPrice}원</span>
                         <button
@@ -146,7 +97,6 @@ function ListComponent() {
             )}
         </div>
     );
-
 }
 
 export default ListComponent;
