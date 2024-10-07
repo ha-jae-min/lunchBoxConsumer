@@ -75,6 +75,7 @@ function ReservationListComponent() {
 
     const listLI = pageResponse.dtoList.map((reservation: IReservation, index) => {
         const { mno, title, dueDate } = reservation;
+        const [lunchboxType, quantity, totalPrice] = title.split(" - ");
 
         return (
             <li
@@ -86,7 +87,7 @@ function ReservationListComponent() {
             >
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                        {title}
+                        메뉴: {lunchboxType} | 수량: {quantity}개 | 총 가격: {totalPrice}원
                     </h3>
                     <p className="text-md font-medium text-gray-900">예약일: {dueDate}</p>
                 </div>
