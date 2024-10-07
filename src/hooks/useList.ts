@@ -1,7 +1,6 @@
 import { IPageResponse } from "../types/product.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAppSelector } from "./rtk.ts";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import useMobileCheck from "./useMobileCheck.ts";
 import { getProductList } from "../api/kioskAPI.ts";
 
@@ -21,6 +20,24 @@ const initialState: IPageResponse = {
     current: 1,
 };
 
+const getNumber = (obj) => {
+
+    if(!obj ) {
+        return 1
+    }
+
+    if(Number.isNaN(obj)) {
+        return 1;
+    }
+
+    try {
+        return parseInt(obj)
+    }catch(err) {
+        return 1
+    }
+
+}
+
 const useList = () => {
     const [page, setPage] = useState<number>(1);
     const [size] = useState<number>(10);
@@ -28,65 +45,71 @@ const useList = () => {
     const [pageResponse, setPageResponse] = useState<IPageResponse>(initialState);
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [keyword, setKeyword] = useState<string>("");
-
+    const location = useLocation();
     const navigate = useNavigate();
-    const cartItems = useAppSelector((state) => state.cart.products); // 장바구니 상태 가져오기
-    const [searchParams, setSearchParams] = useSearchParams(); // URL 쿼리스트링을 위한 훅
+    const [searchParams, setSearchParams] = useSearchParams(); // URL 쿼리스트링 훅
+
+
+    const browserPage:number = getNumber(searchParams.get("page"))
+
+    useEffect(() => {
+
+        const currentKeyword = searchParams.get("keyword");
+
+        // 페이지가 변경되었을 때만 설정
+        if (browserPage !== page) {
+            setPage(browserPage); // 페이지 설정
+        }
+
+        if (currentKeyword) {
+            setKeyword(currentKeyword);
+        }
+
+    }, [browserPage, page]);
+
 
     // 스크롤 감지 Ref
     const observer = useRef<IntersectionObserver | null>(null);
-
     const lastElementRef = useCallback(
         (node: HTMLElement | null) => {
-            if (loading) return;
+            if (loading || pageResponse.dtoList.length === 0 || !hasMore) return; // 데이터가 없으면 옵저버 실행 안 함
             if (observer.current) observer.current.disconnect();
 
             observer.current = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting && hasMore) {
-                    setPage((prevPage) => prevPage + 1);
+
+                    // 페이지 증가 및 URL 쿼리스트링 업데이트
+                    setSearchParams({ page: String(page + 1), ...(keyword ? { keyword } : {}) });
                 }
             });
 
             if (node) observer.current.observe(node);
         },
-        [loading, hasMore]
+        [hasMore, loading, pageResponse.dtoList.length]
     );
 
-    // 장바구니에 담긴 총 금액 계산
-    const totalCartPrice = cartItems.reduce(
-        (total, item) => total + item.totalPrice,
-        0
-    );
+
 
     useEffect(() => {
+
         setLoading(true);
-        getProductList(page, size, keyword).then((data) => {
+
+        getProductList(browserPage, size, keyword).then((data) => {
             setPageResponse((prevData) => ({
                 ...data,
-                dtoList: page === 1 ? data.dtoList : [...prevData.dtoList, ...data.dtoList], // 첫 페이지일 경우 새로 설정, 그 외 추가
+                dtoList: browserPage === 1 ? data.dtoList : [...prevData.dtoList, ...data.dtoList],
             }));
             setLoading(false);
             if (data.dtoList.length < size) {
-                setHasMore(false); // 더 이상 데이터가 없을 경우
+                setHasMore(false);
             } else {
                 setHasMore(true);
             }
         });
-
-        // URL 쿼리스트링 업데이트
-        const query = {
-            page: String(page),
-            ...(keyword ? { keyword } : {}),
-        };
-        setSearchParams(query);
-
-    }, [page, keyword]);
+    }, [browserPage, keyword]);
 
     // 카테고리 선택 시 호출되는 함수
     const handleCategorySelect = (category: string) => {
-
-        console.log(searchParams)
-
         setPage(1);  // 페이지 초기화
         setPageResponse(initialState);  // 이전 검색 결과 초기화
 
@@ -103,18 +126,18 @@ const useList = () => {
 
     // 조회 페이지 이동
     const moveToRead = (pno: number) => {
-        const query = `page=${page}` + (keyword ? `&keyword=${keyword}` : "");
-        navigate(`/kiosk/detail/${pno}?${query}`);
+        navigate({pathname: `/kiosk/detail/${pno}`, search: `${location.search}`});
     };
 
     // 장바구니 페이지로 이동
     const moveToCartPage = () => {
-        navigate("/kiosk/cart"); // 장바구니 페이지 경로로 이동
+        navigate("/kiosk/cart");
     };
 
     return {
-        loading, pageResponse, isMobile, cartItems, totalCartPrice,
-        moveToRead, moveToCartPage, lastElementRef, handleCategorySelect,};
+        loading, pageResponse, isMobile,
+        moveToRead, moveToCartPage, lastElementRef, handleCategorySelect,
+    };
 };
 
 export default useList;

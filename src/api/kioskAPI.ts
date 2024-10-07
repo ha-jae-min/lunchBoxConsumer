@@ -13,6 +13,10 @@ export const getProductList = async (
     size: number = 10,
     keyword: string = ""
 ) => {
+
+    if( page <= 0){
+        page = 1
+    }
     // 검색 파라미터가 있을 때 URL 동적으로 생성
     const queryParams = `page=${page}&size=${size}&keyword=${encodeURIComponent(keyword)}`;
     const res = await axios.get(`${apiHost}/list?${queryParams}`);

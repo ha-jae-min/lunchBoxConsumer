@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import { getDetail } from '../../api/kioskAPI'; // getDetail API 사용
 import { IProduct } from '../../types/product';
 import LoadingComponent from '../LoadingComponent.tsx';
@@ -34,7 +34,9 @@ const DetailComponent = () => {
         ? 'http://192.168.0.2:8091/api/products' // 모바일용 서버 주소
         : 'http://localhost:8091/api/products'; // 로컬 서버 주소
 
+
     const moveToListPage = (): void => {
+        console.log(queryString)
         navigate({
             pathname: '/kiosk/list',  // 목록 페이지로 이동
             search: queryString,
