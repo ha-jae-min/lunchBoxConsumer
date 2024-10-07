@@ -18,9 +18,6 @@ function ListComponent() {
         0
     );
 
-    console.log("왜 3번 나옴?")
-    console.log("cartItems: " + cartItems.length)
-
     const categories = ["전체", "맥", "피카츄", "라이츄", "숟가락", "젓가락"];
 
     // URL에서 keyword를 즉시 가져와 초기 상태로 설정
@@ -105,7 +102,8 @@ function ListComponent() {
 
             {/* 장바구니 총 금액 및 버튼 */}
             {cartItems.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex flex-col space-y-4 items-center">
+                <div
+                    className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 flex flex-col space-y-4 items-center z-50">
                     <div className="w-full flex justify-between items-center">
                         <span className="text-lg font-semibold">총 금액: {totalCartPrice}원</span>
                         <button
